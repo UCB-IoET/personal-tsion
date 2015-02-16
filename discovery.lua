@@ -15,7 +15,7 @@ function s_main()
 
 	-- service invocation message
 	local svc_invoke ={["setRlyA"]=1}
-	msg = storm.mp.pack(svc_invoke)  -- pack service invocation
+	local invoke_call = storm.mp.pack(svc_invoke)  -- pack service invocation
 
 	-- set up udp socket
 	ssock = storm.net.udpsocket(S_PORT, function(payload, from, port) 
