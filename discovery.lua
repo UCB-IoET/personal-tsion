@@ -28,7 +28,7 @@ function s_main()
 
 	storm.os.invokePeriodically(1*storm.os.SECOND, function()
 								print(msg)
-								storm.net.sendto(ssock, msg, "ff02::1", 1525)
+								storm.net.sendto(ssock, msg, "ff02::1", R_PORT)
 								print("service table has been sent!")
 							end)
 
@@ -73,7 +73,4 @@ end
 sh.start()
 shield.LED.start()
 cord.enter_loop()
-
-s_main()
-
 
