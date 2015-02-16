@@ -43,21 +43,16 @@ storm.os.invokePeriodically(500*storm.os.MILLISECOND, function()
 end)
 
 -- service that receives a string and simply prints it out
-function svc_stdout(from_ip, from_port, msg)
-	
+function svc_stdout(from_ip, from_port, msg)	
 	--print (string.format("[STDOUT] (ip=%s, port=%d)", from_ip, from_port))
-
 	--printServicePairs(msg)
-
 	-- decode message
 	print(msg.setRlyA)
 	local invoke = msg.setRlyA
-	
 	if invoke == 1 then
 		shield.LED.on("blue")
 		print("Decoded message!")
 	end
-	
 end
 
 
