@@ -43,7 +43,7 @@ function s_main()
 				     	end)
 
 
-	storm.os.invokePeriodically(1*storm.os.SECOND, function()
+	storm.os.invokePeriodically(5*storm.os.SECOND, function()
 								print(msg)
 								storm.net.sendto(ssock, msg, "ff02::1", R_PORT)
 								print("service table has been sent!")
