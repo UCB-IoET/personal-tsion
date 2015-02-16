@@ -40,7 +40,6 @@ function s_main()
 						--table[from] = storm.mp.unpack(payload)
 						table[from] = svc_manifest
 						pprint()
-						--msg = storm.mp.pack(svc_invoke)
 				     	end)
 
 
