@@ -7,6 +7,23 @@ table = {}
 S_PORT = 1526
 R_PORT = 1525
 
+function pprint()
+	print("print table function")
+	print(" ")
+	for k,v in pairs(table) do
+		for i,j in pairs(v) do
+			if type(j)=="table" then 
+				for a,b in pairs(j) do 
+					print(k,i,a,b)
+				end
+			else
+				print(k,i,j)
+			end
+		end
+	end
+	print(" ")
+end
+
 ----------------------- S Main --------------------------
 function s_main()
 	-- service announcement table
@@ -22,6 +39,7 @@ function s_main()
 						print (string.format("from %s port %d: %s",from,port,payload))
 						--table[from] = storm.mp.unpack(payload)
 						table[from] = svc_manifest
+						pprint()
 						--msg = storm.mp.pack(svc_invoke)
 				     	end)
 
@@ -48,6 +66,8 @@ function r_main()
 	--- set up socket
 	rsock = storm.net.udpsocket(R_PORT, function(payload, from, port)
 					print (string.format("from %s port %d: %s",from,port,payload))
+					table[from] = storm.mp.unpack(payload)
+					pprint()
 					svc_stdout(from, port, storm.mp.unpack(payload))
 				    end)
 
@@ -73,7 +93,5 @@ end
 sh.start()
 shield.LED.start()
 cord.enter_loop()
-
-s_main()
 
 
