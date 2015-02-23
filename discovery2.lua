@@ -7,6 +7,12 @@ table = {}
 S_PORT = 1626
 R_PORT = 1625
 
+local motorL = storm.io.D2
+local motorR = storm.io.D3
+local buzzer = storm.io.D4
+storm.io.set_mode(storm.io.OUTPUT, motorL, motorR, buzzer)
+
+
 function pprint()
 	print("print table function")
 	print(" ")
@@ -48,31 +54,47 @@ function print_msg(msg)
    return msg
 end
 
------------------------ S Main --------------------------
-
-function s_main()
-	-- service announcement table
-        local svc_manifest = { id= "Sin Nombre", setRlyA={ s="setBool", desc= "red LED"}}
-        local msg = storm.mp.pack(svc_manifest) -- pack service announcement table
-        -- set up udp socket
-        ssock = storm.net.udpsocket(R_PORT, function(payload, from, port)
-						print (string.format("We're not stupid: from %s port %d: %s",from,port,payload))
-                                                table[from] = storm.mp.unpack(payload)
-                                                --pprint(table)
-					     end)
-
-        serviceSock = storm.net.udpsocket(S_PORT, function(payload, from, port)
-          print (string.format("We're stupid: from %s port %d: %s", from, port, payload))
-        end)
-
-
-
-        storm.os.invokePeriodically(5*storm.os.SECOND, function()
-                print(msg)
-                storm.net.sendto(ssock, msg, "ff02::1", R_PORT)
-		print("service table has been sent!")
-		end)
+function wait(period)
+        cord.await(storm.os.invokeLater, period*storm.os.SECOND)
 end
+
+----------------------- S Main --------------------------
+function s_main()
+        -- service announcement table
+        svc_manifest = { id= "Tank", 
+			       mvTankFwd= { s="setBool", desc= "forward" },
+			       mvTankRgt= { s="setBool", desc= "right"   },
+			       mvTankLft= { s="setBool", desc= "left"    },
+			       mvTankStp= { s="setBool", desc= "stop"    },
+			       honkHorn = { s="setBool", desc= "buzzer"  }}
+
+	local msg = storm.mp.pack(svc_manifest) -- pack service announcement table
+
+	-- service invocation message
+	--local svc_invoke ={["setRlyA"]=1}
+	--local invoke_call = storm.mp.pack(svc_invoke)  -- pack service invocation
+
+	-- set up udp socket
+	ssock = storm.net.udpsocket(S_PORT, function(payload, from, port) 
+				       print (string.format("from %s port %d: %s",from,port,payload))
+				      table[from] = storm.mp.unpack(payload)
+				      -- table[from] = svc_manifest
+					
+				      print("Printing Received Table: ")
+				      pprint()
+				      print("Parsing Received Table: ")
+				      svc_stdout(from, port, storm.mp.unpack(payload))
+					    end)
+
+
+	storm.os.invokePeriodically(5*storm.os.SECOND, function()
+				       print(msg)
+				       storm.net.sendto(ssock, msg, "ff02::1", R_PORT)
+				       print("service table has been sent!")
+						       end)
+
+end
+
 ---------------------- R Main --------------------------
 
 function r_main()
@@ -109,7 +131,8 @@ function r_main()
 									local msg_sent = storm.mp.pack(svc_invoke)
 									storm.net.sendto(rsock, msg_sent, location, S_PORT)
 									print (string.format("to %s port %d: %s", location, S_PORT, msg_sent))
-				                                end
+									--cord.new(function() cord.await(storm.os.invokeLater, 2*storm.os.SECOND) end
+								end
 								--print ("Checked services offered.")
                        					 end
                 				end
@@ -129,6 +152,8 @@ function svc_stdout(from_ip, from_port, msg)
 	--end
 	print("Decoded message!")
 end
+
+--r_main()
 
 sh.start()
 shield.LED.start()
